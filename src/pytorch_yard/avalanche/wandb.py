@@ -24,13 +24,18 @@ class WandbEpochLogger(StrategyLogger):
                  config: Optional[dict[str, Any]] = None,
                  tags: Optional[list[str]] = None,
                  notes: Optional[str] = None,
+                 start_from_epoch_one: bool = True,
+                 start_from_experience_one: bool = True
                  ):
         super().__init__()
 
-        self.global_epoch = 0
-        self.experience_epoch = 0
+        self.start_from_epoch_one = start_from_epoch_one
+        self.start_from_experience_one = start_from_experience_one
 
-        self.current_experience = 0
+        self.global_epoch = 1 if self.start_from_epoch_one else 0
+        self.experience_epoch = 1 if self.start_from_epoch_one else 0
+
+        self.current_experience = 1 if self.start_from_experience_one else 0
 
         self.wandb = wandb
         self.wandb.init(project=project, entity=entity, name=name, dir=dir,  # type: ignore
@@ -40,7 +45,8 @@ class WandbEpochLogger(StrategyLogger):
         name = metric_value.name
         value = metric_value.value
 
-        supported_types = Image, Tensor, TensorImage, Figure, float, int, self.wandb.viz.CustomChart
+        supported_types = (Image, Tensor, TensorImage, Figure,
+                           float, int, self.wandb.Histogram, self.wandb.viz.CustomChart)
 
         if isinstance(value, AlternativeValues):
             value = value.best_supported_value(*supported_types)
@@ -75,4 +81,6 @@ class WandbEpochLogger(StrategyLogger):
         experience = cast(NCExperience, strategy.experience)  # type: ignore
 
         self.current_experience = experience.current_experience
-        self.experience_epoch = 0
+        if self.start_from_experience_one:
+            self.current_experience += 1
+        self.experience_epoch = 1 if self.start_from_epoch_one else 0
