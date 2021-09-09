@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, Type, cast
+from typing import Callable, Literal, Optional, Type, cast
 
 import hydra
 import setproctitle
@@ -58,6 +58,7 @@ class Experiment(ABC):
         if experiment_variant == 'lightning':
             pass
         elif experiment_variant == 'avalanche':
+            self.wandb_logger: WandbEpochLogger
             self.wandb_logger.wandb.finish()  # type: ignore
         else:
             pass
