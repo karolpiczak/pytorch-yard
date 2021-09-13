@@ -1,11 +1,15 @@
 import os
+import random
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Literal, Optional, Type, cast
 
 import hydra
+import numpy as np
 import setproctitle
+import torch
 from dotenv import load_dotenv
+from dotenv.main import find_dotenv
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
 
@@ -14,7 +18,7 @@ from .configs import RootConfig, Settings, get_tags, register_configs
 from .utils.logging import info, info_bold
 from .utils.rundir import finish_rundir, setup_rundir
 
-load_dotenv()
+load_dotenv(find_dotenv(usecwd=True))
 
 
 class Experiment(ABC):
@@ -76,7 +80,14 @@ class Experiment(ABC):
             Top-level Hydra config for the experiment.
         """
         self.root_cfg = root_cfg
+        self.seed_everything(root_cfg.cfg.seed)
         self._initialize()
+
+    def seed_everything(self, seed: int) -> None:
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)  # type: ignore
+        torch.cuda.manual_seed_all(seed)
 
     def _pytorch(self) -> None:
         RUN_NAME = os.getenv('RUN_NAME')

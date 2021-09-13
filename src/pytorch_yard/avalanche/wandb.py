@@ -64,10 +64,13 @@ class WandbEpochLogger(StrategyLogger):
 
         self.wandb.log({  # type: ignore
             name: value,
-            'epoch': self.global_epoch,
-            'experience_epoch': self.experience_epoch,
+            'epoch': self.global_epoch - 1 if 'eval' in callback else self.global_epoch,
+            'experience_epoch': self.experience_epoch - 1 if 'eval' in callback else self.experience_epoch,
             'current_experience': self.current_experience,
-        }, step=self.global_epoch)
+        }, step=self.global_epoch - 1 if 'eval' in callback else self.global_epoch)
+
+    def before_training(self, strategy: BaseStrategy, metric_values: list[MetricValue], **kwargs: Any):
+        super().before_training(strategy, metric_values, **kwargs)  # type: ignore
 
     def after_training_epoch(self, strategy: BaseStrategy, metric_values: list[MetricValue], **kwargs: Any):
         super().after_training_epoch(strategy, metric_values, **kwargs)  # type: ignore
