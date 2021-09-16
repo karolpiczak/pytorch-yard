@@ -1,0 +1,17 @@
+name: pytorch-mnist
+dependencies:
+  - python=3.9.2
+  - conda-forge::jupyterlab
+  - conda-forge::jupyterlab-lsp
+  - conda-forge::python-language-server
+  - conda-forge::nodejs
+  - numpy
+  - pandas
+  - pip
+  - scikit-learn
+  - scipy
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - cudatoolkit=11.1
+  - pip:
+      - -r requirements.txt

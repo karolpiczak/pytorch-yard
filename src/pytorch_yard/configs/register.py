@@ -27,6 +27,7 @@ class RootConfig():
     """
     defaults: List[Any] = field(default_factory=lambda: [
         {'cfg': 'default'},
+        '_self_',
         {'override hydra/job_logging': 'rich'},
         {'override hydra/hydra_logging': 'rich'},
     ])
