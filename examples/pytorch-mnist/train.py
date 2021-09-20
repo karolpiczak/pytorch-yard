@@ -3,31 +3,28 @@ from typing import Optional, Type, cast
 import pytorch_yard
 import torch
 import torchvision.transforms as transforms
+from pytorch_yard.experiments.pytorch import PyTorchExperiment
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 
 from pytorch_mnist.cfg import Settings
 
 
-class Experiment(pytorch_yard.Experiment):
+class Experiment(PyTorchExperiment):
 
     def __init__(self, config_path: str, settings_cls: Type[Settings], settings_group: Optional[str] = None) -> None:
-        super().__init__(config_path, settings_cls, settings_group=settings_group, experiment_variant='avalanche')
+        super().__init__(config_path, settings_cls, settings_group=settings_group)
 
         self.cfg: Settings
         """ Experiment config. """
 
-        self.device: torch.device
-        """ Selected training device (cuda/cpu). """
+    def entry(self, root_cfg: pytorch_yard.RootConfig):
+        super().entry(root_cfg)
 
-    def main(self, root_cfg: pytorch_yard.RootConfig):
-        super().main(root_cfg)
-
+    def main(self) -> None:
         # ------------------------------------------------------------------------------------------
         # Init
         # ------------------------------------------------------------------------------------------
-        self.cfg = cast(Settings, root_cfg.cfg)
-
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
         else:
