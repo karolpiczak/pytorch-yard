@@ -1,7 +1,7 @@
 from typing import Any, Optional, cast
 
 import numpy as np
-from matplotlib.pyplot import Figure
+from matplotlib.figure import Figure
 from numpy import array
 from PIL.Image import Image
 from torch import Tensor
@@ -24,6 +24,7 @@ class WandbEpochLogger(StrategyLogger):
                  config: Optional[dict[str, Any]] = None,
                  tags: Optional[list[str]] = None,
                  notes: Optional[str] = None,
+                 group: Optional[str] = None,
                  start_from_epoch_one: bool = True,
                  start_from_experience_one: bool = True
                  ):
@@ -39,7 +40,7 @@ class WandbEpochLogger(StrategyLogger):
 
         self.wandb = wandb
         self.wandb.init(project=project, entity=entity, name=name, dir=dir,  # type: ignore
-                        config=config, tags=tags, notes=notes)
+                        config=config, tags=tags, notes=notes, group=group)
 
     def log_metric(self, metric_value: MetricValue, callback: str):
         name = metric_value.name

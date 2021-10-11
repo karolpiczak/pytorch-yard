@@ -44,6 +44,7 @@ class RootConfig():
 
     # wandb metadata
     notes: Optional[str] = None
+    group: Optional[str] = None
     tags: Optional[List[str]] = None
 
 

@@ -54,7 +54,8 @@ class AvalancheExperiment(Experiment):
             dir=str(Path(os.getenv('RUN_DIR', '.'))),
             config=OmegaConf.to_container(self.root_cfg, resolve=True),  # type: ignore
             tags=get_tags(cast(DictConfig, self.root_cfg)),
-            notes=str(self.root_cfg.notes),
+            notes=str(self.root_cfg.notes) if self.root_cfg.notes is not None else None,
+            group=str(self.root_cfg.group) if self.root_cfg.group is not None else None,
         )
 
         if torch.cuda.is_available():
