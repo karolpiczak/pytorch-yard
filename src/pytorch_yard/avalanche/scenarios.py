@@ -12,7 +12,7 @@ def incremental_task(
     test: torch.utils.data.Dataset[torch.Tensor],
     transform: Any,
     n_experiences: int,
-    n_classes: int
+    n_classes: int,
 ) -> Tuple[NCScenario, int]:
     """
     Incremental task setup.
@@ -27,11 +27,12 @@ def incremental_task(
         n_experiences=n_experiences,
         task_labels=True,
         fixed_class_order=range(n_classes),
+        class_ids_from_zero_in_each_exp=True,
         train_transform=transform,
         eval_transform=transform,
     )
 
-    n_output_classes = n_classes
+    n_output_classes = n_classes // n_experiences
 
     return benchmark, n_output_classes
 
@@ -41,7 +42,7 @@ def incremental_domain(
     test: torch.utils.data.Dataset[torch.Tensor],
     transform: Any,
     n_experiences: int,
-    n_classes: int
+    n_classes: int,
 ) -> Tuple[NCScenario, int]:
     """
     Incremental domain setup.
@@ -71,7 +72,7 @@ def incremental_class(
     test: torch.utils.data.Dataset[torch.Tensor],
     transform: Any,
     n_experiences: int,
-    n_classes: int
+    n_classes: int,
 ) -> Tuple[NCScenario, int]:
     """
     Incremental class setup.
