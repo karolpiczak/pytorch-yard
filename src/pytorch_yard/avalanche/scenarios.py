@@ -10,7 +10,8 @@ from avalanche.benchmarks.scenarios.new_classes.nc_scenario import NCScenario
 def incremental_task(
     train: torch.utils.data.Dataset[torch.Tensor],
     test: torch.utils.data.Dataset[torch.Tensor],
-    transform: Any,
+    train_transform: Any,
+    eval_transform: Any,
     n_experiences: int,
     n_classes: int,
 ) -> Tuple[NCScenario, int]:
@@ -28,8 +29,8 @@ def incremental_task(
         task_labels=True,
         fixed_class_order=range(n_classes),
         class_ids_from_zero_in_each_exp=True,
-        train_transform=transform,
-        eval_transform=transform,
+        train_transform=train_transform,
+        eval_transform=eval_transform,
     )
 
     n_output_classes = n_classes // n_experiences
@@ -40,7 +41,8 @@ def incremental_task(
 def incremental_domain(
     train: torch.utils.data.Dataset[torch.Tensor],
     test: torch.utils.data.Dataset[torch.Tensor],
-    transform: Any,
+    train_transform: Any,
+    eval_transform: Any,
     n_experiences: int,
     n_classes: int,
 ) -> Tuple[NCScenario, int]:
@@ -58,8 +60,8 @@ def incremental_domain(
         task_labels=False,
         fixed_class_order=range(n_classes),
         class_ids_from_zero_in_each_exp=True,
-        train_transform=transform,
-        eval_transform=transform,
+        train_transform=train_transform,
+        eval_transform=eval_transform,
     )
 
     n_output_classes = n_classes // n_experiences
@@ -70,7 +72,8 @@ def incremental_domain(
 def incremental_class(
     train: torch.utils.data.Dataset[torch.Tensor],
     test: torch.utils.data.Dataset[torch.Tensor],
-    transform: Any,
+    train_transform: Any,
+    eval_transform: Any,
     n_experiences: int,
     n_classes: int,
 ) -> Tuple[NCScenario, int]:
@@ -86,8 +89,8 @@ def incremental_class(
         n_experiences=n_experiences,
         task_labels=False,
         fixed_class_order=range(n_classes),
-        train_transform=transform,
-        eval_transform=transform,
+        train_transform=train_transform,
+        eval_transform=eval_transform,
     )
 
     n_output_classes = n_classes
