@@ -1,4 +1,4 @@
-__version__ = "2021.1.26.0"
+__version__ = "2022.01.26"
 
 from . import experiments as experiments
 from .configs import RootConfig as RootConfig
