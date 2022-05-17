@@ -17,7 +17,8 @@ class TrainerConf:
     process_position: int = 0
     num_nodes: int = 1
     num_processes: int = 1
-    gpus: Any = None  # Union[int, str, List[int], NoneType]
+    # gpus: Any = None  # Union[int, str, List[int], NoneType]
+    devices: Any = None  # Union[int, str, List[int], NoneType]
     auto_select_gpus: bool = False
     tpu_cores: Any = None  # Union[int, str, List[int], NoneType]
     log_gpu_memory: Optional[str] = None
@@ -59,7 +60,8 @@ class TrainerConf:
 @dataclass
 class LightningConf(TrainerConf):
     deterministic: bool = True
-    gpus: int = 1
+    accelerator: str = "gpu"
+    devices: int = 1
 
 
 @dataclass
