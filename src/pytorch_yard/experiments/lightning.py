@@ -28,10 +28,10 @@ class LightningExperiment(Experiment):
         self.trainer: Optional[pl.Trainer] = None
 
         self.wandb_logger = WandbLogger(
-            project=os.getenv('WANDB_PROJECT'),
-            entity=os.getenv('WANDB_ENTITY'),
-            name=os.getenv('RUN_NAME'),
-            save_dir=str(Path(os.getenv('RUN_DIR', '.'))),
+            project=os.getenv("WANDB_PROJECT"),
+            entity=os.getenv("WANDB_ENTITY"),
+            name=os.getenv("RUN_NAME"),
+            save_dir=str(Path(os.getenv("RUN_DIR", "."))),
         )
 
         # Init logger from source dir (code base) before switching to run dir (results)
@@ -44,12 +44,17 @@ class LightningExperiment(Experiment):
         self.run.notes = str(self.root_cfg.notes)
         self.wandb_logger.log_hyperparams(OmegaConf.to_container(self.root_cfg.cfg, resolve=True))  # type: ignore
 
+        Path(self.root_cfg.data_dir).mkdir(parents=True, exist_ok=True)
         self.setup_datamodule()
-        assert self.datamodule is not None, 'A LightningDataModule should be assigned to self.datamodule inside setup_datamodule().'
+        assert (
+            self.datamodule is not None
+        ), "A LightningDataModule should be assigned to self.datamodule inside setup_datamodule()."
 
         self.setup_system()
-        assert self.system is not None, 'A main LightningModule should be assigned to self.system inside setup_system().'
-        info_bold(f'System architecture:')
+        assert (
+            self.system is not None
+        ), "A main LightningModule should be assigned to self.system inside setup_system()."
+        info_bold(f"System architecture:")
         info(str(self.system))
 
         self.setup_callbacks()
@@ -76,16 +81,14 @@ class LightningExperiment(Experiment):
         pass
 
     def setup_callbacks(self) -> None:
-        # TODO: Add validation scheduler
-        # https://github.com/BioNN-InfoTech/continual-learning-3d-points/blob/main/src/utils/callbacks.py
-
         if self.cfg.save_checkpoints:
-            # TODO: Add custom checkpointer
-            # https://github.com/BioNN-InfoTech/continual-learning-3d-points/blob/main/src/utils/callbacks.py
             checkpointer = ModelCheckpoint(
-                every_n_epochs=1,  # checkpointing interval in epochs, but still will save only on validation epoch
-                dirpath='checkpoints',
-                filename='{epoch}',
+                dirpath="checkpoints",
+                filename="epoch{epoch:02d}",
+                auto_insert_metric_name=False,
+                every_n_epochs=1,
+                save_on_train_epoch_end=True,
+                save_weights_only=True,
             )
 
             self.callbacks.append(checkpointer)
@@ -98,18 +101,18 @@ class LightningExperiment(Experiment):
         # if resume_path is not None:
         #     log.info(f'[bold yellow]\\[checkpoint] [bold white]{resume_path}')
 
-        info_bold(f'Overriding cfg.pl settings with derived values:')
+        info_bold(f"Overriding cfg.pl settings with derived values:")
         # info(f' >>> resume_from_checkpoint = {resume_path}')
-        info(f' >>> num_sanity_val_steps = {num_sanity_val_steps}')
-        info(f'')
+        info(f" >>> num_sanity_val_steps = {num_sanity_val_steps}")
+        info("")
 
         self.trainer = hydra.utils.instantiate(  # type: ignore
             self.cfg.pl,
             logger=self.wandb_logger,
             callbacks=self.callbacks,
-            checkpoint_callback=self.cfg.save_checkpoints,
-            #     resume_from_checkpoint=resume_path,
+            enable_checkpointing=self.cfg.save_checkpoints,
             num_sanity_val_steps=num_sanity_val_steps,
+            #     resume_from_checkpoint=resume_path,
         )
 
     def fit(self) -> None:
@@ -118,7 +121,7 @@ class LightningExperiment(Experiment):
 
     def finish(self) -> None:
         if self.trainer.interrupted:  # type: ignore
-            error(f'Training interrupted.')
+            error(f"Training interrupted.")
             self.run.finish(exit_code=255)
         else:
             self.run.finish()
