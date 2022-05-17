@@ -16,11 +16,11 @@ class TrainerConf:
     gradient_clip_val: float = 0
     process_position: int = 0
     num_nodes: int = 1
-    num_processes: int = 1
+    # num_processes: int = 1
     # gpus: Any = None  # Union[int, str, List[int], NoneType]
     devices: Any = None  # Union[int, str, List[int], NoneType]
     auto_select_gpus: bool = False
-    tpu_cores: Any = None  # Union[int, str, List[int], NoneType]
+    # tpu_cores: Any = None  # Union[int, str, List[int], NoneType]
     log_gpu_memory: Optional[str] = None
     overfit_batches: Any = 0.0  # Union[int, float]
     track_grad_norm: Any = -1  # Union[int, float, str]
@@ -39,10 +39,10 @@ class TrainerConf:
     accelerator: Any = None  # Union[str, Accelerator, NoneType]
     sync_batchnorm: bool = False
     precision: int = 32
-    weights_summary: Optional[str] = "top"
-    weights_save_path: Optional[str] = None
+    # weights_summary: Optional[str] = "top"
+    # weights_save_path: Optional[str] = None
     num_sanity_val_steps: int = 2
-    resume_from_checkpoint: Any = None  # Union[str, Path, NoneType]
+    # resume_from_checkpoint: Any = None  # Union[str, Path, NoneType]
     profiler: Any = None  # Union[BaseProfiler, bool, str, NoneType]
     benchmark: bool = False
     deterministic: bool = False
