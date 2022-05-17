@@ -7,7 +7,9 @@ from . import Settings
 @dataclass
 class TrainerConf:
     _target_: str = "pytorch_lightning.trainer.Trainer"
-    logger: Any = True  # Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool]
+    logger: Any = (
+        True  # Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool]
+    )
     enable_checkpointing: bool = True
     callbacks: Any = None  # Optional[List[Callback]]
     default_root_dir: Optional[str] = None
@@ -43,11 +45,11 @@ class TrainerConf:
     profiler: Any = None  # Union[BaseProfiler, bool, str, NoneType]
     benchmark: bool = False
     deterministic: bool = False
-    reload_dataloaders_every_epoch: bool = False
+    # reload_dataloaders_every_epoch: bool = False
     auto_lr_find: Any = False  # Union[bool, str]
     replace_sampler_ddp: bool = True
     auto_scale_batch_size: Any = False  # Union[str, bool]
-    plugins: Any = None   # Union[str, list, NoneType]
+    plugins: Any = None  # Union[str, list, NoneType]
     amp_backend: str = "native"
     # amp_level: str = "O2"
     move_metrics_to_cpu: bool = False
