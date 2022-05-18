@@ -1,8 +1,8 @@
+from contextlib import contextmanager
 from typing import Any, Optional, cast
 
 import pytorch_lightning as pl
-from pytorch_lightning.loggers.base import (LightningLoggerBase,
-                                            LoggerCollection)
+from pytorch_lightning.loggers.base import LightningLoggerBase, LoggerCollection
 from pytorch_lightning.loggers.wandb import WandbLogger
 
 from wandb.sdk.wandb_run import Run
@@ -14,7 +14,7 @@ class LightningModuleWithWandb(pl.LightningModule):
 
     """
 
-    def __init__(self,  *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
         self.wandb: Optional[Run] = None
@@ -39,3 +39,10 @@ class LightningModuleWithWandb(pl.LightningModule):
                     self.wandb = cast(Run, logger.experiment)  # type: ignore
         elif isinstance(self.logger, WandbLogger):
             self.wandb = cast(Run, self.logger.experiment)  # type: ignore
+
+    @contextmanager
+    def no_train(self):
+        training = self.training
+        self.train(False)
+        yield
+        self.train(training)
