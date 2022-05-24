@@ -42,7 +42,7 @@ class Experiment(ABC):
 
         # Hydra will change workdir to the run dir before calling `self.main`
         register_configs(self.settings_cls, self.settings_group)
-        hydra_decorator = hydra.main(config_path=config_path, config_name='root')
+        hydra_decorator = hydra.main(config_path=config_path, config_name='root', version_base="1.1")
         hydra_decorator(self.entry)()
 
         self.finish()
