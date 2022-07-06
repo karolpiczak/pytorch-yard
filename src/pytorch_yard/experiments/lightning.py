@@ -8,6 +8,10 @@ import pytorch_lightning as pl
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks.progress.rich_progress import (
+    RichProgressBar,
+    RichProgressBarTheme,
+)
 from pytorch_lightning.loggers import WandbLogger
 from wandb.sdk.wandb_run import Run
 
@@ -93,6 +97,22 @@ class LightningExperiment(Experiment):
 
             self.callbacks.append(checkpointer)
 
+        # create your own theme!
+        progress_bar = RichProgressBar(
+            theme=RichProgressBarTheme(
+                description="green_yellow",
+                progress_bar="green1",
+                progress_bar_finished="green1",
+                progress_bar_pulse="#6206E0",
+                batch_progress="green_yellow",
+                time="grey82",
+                processing_speed="grey82",
+                metrics="grey82",
+            )
+        )
+
+        self.callbacks.append(progress_bar)
+
     def setup_trainer(self) -> None:
         num_sanity_val_steps = -1 if self.cfg.validate_before_training else 0
 
@@ -122,6 +142,6 @@ class LightningExperiment(Experiment):
     def finish(self) -> None:
         if self.trainer.interrupted:  # type: ignore
             error(f"Training interrupted.")
-            self.run.finish(exit_code=255)
+            self.run.finish(exit_code=255)  # type: ignore
         else:
-            self.run.finish()
+            self.run.finish()  # type: ignore
