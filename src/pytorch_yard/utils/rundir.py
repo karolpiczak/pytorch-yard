@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 import coolname
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # type: ignore
 
 load_dotenv()
 

@@ -5,5 +5,15 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.black]
+line-length = 119
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"
+skip_glob = ['.vscode/*']
+src_paths = ["src/pytorch_yard"]
+
 [tool.pyright]
 exclude = [".vscode/*"]
+

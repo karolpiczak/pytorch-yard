@@ -6,10 +6,11 @@ from typing import Optional, Type
 
 import hydra
 import numpy.random
-import setproctitle
+import setproctitle  # type: ignore
 import torch
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # type: ignore
 from dotenv.main import find_dotenv
+from git.repo import Repo
 from omegaconf import OmegaConf
 
 from .configs import RootConfig, Settings, register_configs
@@ -31,18 +32,19 @@ class Experiment(ABC):
         self.settings_group = settings_group
         self.root_cfg: RootConfig
 
-        assert os.getenv('DATA_DIR') is not None, "Missing DATA_DIR environment variable."
-        assert os.getenv('RESULTS_DIR') is not None, "Missing RESULTS_DIR environment variable."
-        assert os.getenv('WANDB_PROJECT') is not None, "Missing WANDB_PROJECT environment variable."
-        os.environ['DATA_DIR'] = str(Path(os.environ['DATA_DIR']).expanduser())
-        os.environ['RESULTS_DIR'] = str(Path(os.environ['RESULTS_DIR']).expanduser())
+        assert os.getenv("DATA_DIR") is not None, "Missing DATA_DIR environment variable."
+        assert os.getenv("RESULTS_DIR") is not None, "Missing RESULTS_DIR environment variable."
+        assert os.getenv("WANDB_PROJECT") is not None, "Missing WANDB_PROJECT environment variable."
+        os.environ["DATA_DIR"] = str(Path(os.environ["DATA_DIR"]).expanduser())
+        os.environ["RESULTS_DIR"] = str(Path(os.environ["RESULTS_DIR"]).expanduser())
 
         setup_rundir()
         self.before_entry()
+        self.save_git_state()
 
         # Hydra will change workdir to the run dir before calling `self.main`
         register_configs(self.settings_cls, self.settings_group)
-        hydra_decorator = hydra.main(config_path=config_path, config_name='root', version_base="1.1")
+        hydra_decorator = hydra.main(config_path=config_path, config_name="root", version_base="1.1")
         hydra_decorator(self.entry)()
 
         self.finish()
@@ -51,6 +53,15 @@ class Experiment(ABC):
     @abstractmethod
     def before_entry(self) -> None:
         pass
+
+    def save_git_state(self) -> None:
+        repo = Repo(".")
+        diff: str = repo.git.diff("HEAD~0")
+
+        git_status = f"{repo.head.commit.hexsha}\n{repo.head.commit.message}"
+
+        Path(f"{os.environ['RUN_DIR']}/code.diff").write_text(diff)
+        Path(f"{os.environ['RUN_DIR']}/code.git").write_text(git_status)
 
     @abstractmethod
     def entry(self, root_cfg: RootConfig) -> None:
@@ -65,9 +76,9 @@ class Experiment(ABC):
         self.root_cfg = root_cfg
         self.cfg = root_cfg.cfg
 
-        RUN_NAME = os.getenv('RUN_NAME')
-        info_bold(f'\\[init] Run name --> {RUN_NAME}')
-        info(f'\\[init] Loaded config:\n{OmegaConf.to_yaml(self.root_cfg, resolve=True)}')
+        RUN_NAME = os.getenv("RUN_NAME")
+        info_bold(f"\\[init] Run name --> {RUN_NAME}")
+        info(f"\\[init] Loaded config:\n{OmegaConf.to_yaml(self.root_cfg, resolve=True)}")
         setproctitle.setproctitle(f'{RUN_NAME} ({os.getenv("WANDB_PROJECT")})')  # type: ignore
 
         self.seed_everything(root_cfg.cfg.seed)
