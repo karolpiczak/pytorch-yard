@@ -92,7 +92,7 @@ class LightningExperiment(Experiment):
                 auto_insert_metric_name=False,
                 every_n_epochs=1,
                 save_on_train_epoch_end=True,
-                save_weights_only=True,
+                save_weights_only=False,
             )
 
             self.callbacks.append(checkpointer)
@@ -132,7 +132,7 @@ class LightningExperiment(Experiment):
             callbacks=self.callbacks,
             enable_checkpointing=self.cfg.save_checkpoints,
             num_sanity_val_steps=num_sanity_val_steps,
-            #     resume_from_checkpoint=resume_path,
+            ckpt_path=self.cfg.resume_path,
         )
 
     def fit(self) -> None:

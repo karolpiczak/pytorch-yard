@@ -7,9 +7,7 @@ from . import Settings
 @dataclass
 class TrainerConf:
     _target_: str = "pytorch_lightning.trainer.Trainer"
-    logger: Any = (
-        True  # Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool]
-    )
+    logger: Any = True  # Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool]
     enable_checkpointing: bool = True
     callbacks: Any = None  # Optional[List[Callback]]
     default_root_dir: Optional[str] = None
@@ -72,3 +70,5 @@ class LightningSettings(Settings):
     # Additional experiment settings
     validate_before_training: bool = True
     save_checkpoints: bool = True
+
+    resume_path: Optional[str] = None
