@@ -132,12 +132,15 @@ class LightningExperiment(Experiment):
             callbacks=self.callbacks,
             enable_checkpointing=self.cfg.save_checkpoints,
             num_sanity_val_steps=num_sanity_val_steps,
-            ckpt_path=self.cfg.resume_path,
         )
 
     def fit(self) -> None:
         assert self.system
-        self.trainer.fit(self.system, datamodule=self.datamodule)  # type: ignore
+        self.trainer.fit(  # type: ignore
+            self.system,
+            datamodule=self.datamodule,
+            ckpt_path=self.cfg.resume_path,
+        )
 
     def finish(self) -> None:
         if self.trainer.interrupted:  # type: ignore
