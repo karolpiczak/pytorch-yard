@@ -55,13 +55,19 @@ class Experiment(ABC):
         pass
 
     def save_git_state(self) -> None:
-        repo = Repo(".")
-        diff: str = repo.git.diff("HEAD~0")
+        src_repo = Repo(".")
+        pending_diff: str = src_repo.git.diff("HEAD~0")
 
-        git_status = f"{repo.head.commit.hexsha}\n{repo.head.commit.message}"
+        git_status = f"{str(src_repo.head.commit.hexsha)}\n{src_repo.head.commit.message}"
 
-        Path(f"{os.environ['RUN_DIR']}/code.diff").write_text(diff)
+        Path(f"{os.environ['RUN_DIR']}/code.diff").write_text(pending_diff + "\n")
         Path(f"{os.environ['RUN_DIR']}/code.git").write_text(git_status)
+
+        dst_repo = Repo.clone_from(url=".", to_path=str(Path(f"{os.environ['RUN_DIR']}/code")))  # type: ignore
+        dst_repo.git.checkout("-b", os.getenv("RUN_NAME"))
+
+        dst_repo.git.apply(["-3", f"{os.environ['RUN_DIR']}/code.diff"])
+        dst_repo.index.commit("Save uncommitted code changes")
 
     @abstractmethod
     def entry(self, root_cfg: RootConfig) -> None:
