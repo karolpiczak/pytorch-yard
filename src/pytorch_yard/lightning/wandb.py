@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from typing import Any, Optional, cast
 
 import pytorch_lightning as pl
+import torch
 from pytorch_lightning.loggers.base import LightningLoggerBase, LoggerCollection
 from pytorch_lightning.loggers.wandb import WandbLogger
 from wandb.sdk.wandb_run import Run
@@ -43,5 +44,6 @@ class LightningModuleWithWandb(pl.LightningModule):
     def no_train(self):
         training = self.training
         self.train(False)
-        yield
+        with torch.no_grad():
+            yield
         self.train(training)
