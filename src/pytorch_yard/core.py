@@ -1,5 +1,6 @@
 import os
 import random
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, Type
@@ -40,7 +41,7 @@ class Experiment(ABC):
 
         setup_rundir()
         self.before_entry()
-        self.save_git_state()
+        self.save_state()
 
         # Hydra will change workdir to the run dir before calling `self.main`
         register_configs(self.settings_cls, self.settings_group)
@@ -54,20 +55,26 @@ class Experiment(ABC):
     def before_entry(self) -> None:
         pass
 
-    def save_git_state(self) -> None:
+    def save_state(self) -> None:
         src_repo = Repo(".")
-        pending_diff: str = src_repo.git.diff("HEAD~0")
-
-        git_status = f"{str(src_repo.head.commit.hexsha)}\n{src_repo.head.commit.message}"
-
-        Path(f"{os.environ['RUN_DIR']}/code.diff").write_text(pending_diff + "\n")
-        Path(f"{os.environ['RUN_DIR']}/code.git").write_text(git_status)
-
         dst_repo = Repo.clone_from(url=".", to_path=str(Path(f"{os.environ['RUN_DIR']}/code")))  # type: ignore
         dst_repo.git.checkout("-b", os.getenv("RUN_NAME"))
 
-        dst_repo.git.apply(["-3", f"{os.environ['RUN_DIR']}/code.diff"])
-        dst_repo.index.commit("Save uncommitted code changes")
+        # Git state
+        git_status = f"{str(src_repo.head.commit.hexsha)}\n{str(src_repo.head.commit.message)}"
+        Path(f"{os.environ['RUN_DIR']}/code.git").write_text(git_status, encoding="utf-8")
+
+        # Pending changes
+        pending_diff: str = src_repo.git.diff("HEAD~0")
+
+        if pending_diff:
+            Path(f"{os.environ['RUN_DIR']}/code.diff").write_text(pending_diff + "\n", encoding="utf-8")
+
+            dst_repo.git.apply(["-3", f"{os.environ['RUN_DIR']}/code.diff"])
+            dst_repo.index.commit("Save uncommitted code changes")
+
+        # Cmd line
+        Path(f"{os.environ['RUN_DIR']}/code.cmd").write_text(" ".join(sys.argv) + "\n")
 
     @abstractmethod
     def entry(self, root_cfg: RootConfig) -> None:
@@ -84,7 +91,11 @@ class Experiment(ABC):
 
         RUN_NAME = os.getenv("RUN_NAME")
         info_bold(f"\\[init] Run name --> {RUN_NAME}")
-        info(f"\\[init] Loaded config:\n{OmegaConf.to_yaml(self.root_cfg, resolve=True)}")
+
+        cfg = OmegaConf.to_yaml(self.root_cfg, resolve=True)
+        info(f"\\[init] Loaded config:\n{cfg}")
+        Path(f"{os.environ['RUN_DIR']}/code.cfg").write_text(cfg + "\n")
+
         setproctitle.setproctitle(f'{RUN_NAME} ({os.getenv("WANDB_PROJECT")})')  # type: ignore
 
         self.seed_everything(root_cfg.cfg.seed)
