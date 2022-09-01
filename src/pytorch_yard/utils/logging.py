@@ -22,7 +22,7 @@ class RichConsoleHandler(StreamHandler):  # type: ignore
             self.console.print(self.format(record))  # type: ignore
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
+        except Exception:
             self.handleError(record)
 
 

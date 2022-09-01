@@ -13,6 +13,7 @@ from dotenv import load_dotenv  # type: ignore
 from dotenv.main import find_dotenv
 from git.repo import Repo
 from omegaconf import OmegaConf
+from rich import print
 
 from .configs import RootConfig, Settings, register_configs
 from .utils.logging import info, info_bold
@@ -56,22 +57,25 @@ class Experiment(ABC):
         pass
 
     def save_state(self) -> None:
-        src_repo = Repo(".")
-        dst_repo = Repo.clone_from(url=".", to_path=str(Path(f"{os.environ['RUN_DIR']}/code")))  # type: ignore
-        dst_repo.git.checkout("-b", os.getenv("RUN_NAME"))
+        try:
+            src_repo = Repo(".")
+            dst_repo = Repo.clone_from(url=".", to_path=str(Path(f"{os.environ['RUN_DIR']}/code")))  # type: ignore
+            dst_repo.git.checkout("-b", os.getenv("RUN_NAME"))
 
-        # Git state
-        git_status = f"{str(src_repo.head.commit.hexsha)}\n{str(src_repo.head.commit.message)}"
-        Path(f"{os.environ['RUN_DIR']}/code.git").write_text(git_status, encoding="utf-8")
+            # Git state
+            git_status = f"{str(src_repo.head.commit.hexsha)}\n{str(src_repo.head.commit.message)}"
+            Path(f"{os.environ['RUN_DIR']}/code.git").write_text(git_status, encoding="utf-8")
 
-        # Pending changes
-        pending_diff: str = src_repo.git.diff("HEAD~0")
+            # Pending changes
+            pending_diff: str = src_repo.git.diff("HEAD~0")
 
-        if pending_diff:
-            Path(f"{os.environ['RUN_DIR']}/code.diff").write_text(pending_diff + "\n", encoding="utf-8")
+            if pending_diff:
+                Path(f"{os.environ['RUN_DIR']}/code.diff").write_text(pending_diff + "\n", encoding="utf-8")
 
-            dst_repo.git.apply(["-3", f"{os.environ['RUN_DIR']}/code.diff"])
-            dst_repo.index.commit("Save uncommitted code changes")
+                dst_repo.git.apply(["-3", f"{os.environ['RUN_DIR']}/code.diff"])
+                dst_repo.index.commit("Save uncommitted code changes")
+        except Exception:
+            print(":exclamation:[bold yellow]Code state saving failed. Maybe not running from a git repository?")
 
         # Cmd line
         Path(f"{os.environ['RUN_DIR']}/code.cmd").write_text(" ".join(sys.argv) + "\n")
