@@ -28,7 +28,7 @@ class LightningModuleWithWandb(pl.LightningModule):
     def epoch(self) -> int:
         return self.current_epoch + 1 if not self.trainer.sanity_checking else self.current_epoch  # type: ignore
 
-    def log_wandb(self, data: dict[str, Any], step: int):
+    def log_wandb(self, data: dict[str, Any], step: Optional[int] = None):
         if self.wandb is not None:
             self.wandb.log(data, step=step)  # type: ignore
 
