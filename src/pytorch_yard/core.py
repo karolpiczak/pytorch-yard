@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional, Type
 
 import hydra
+import lovely_tensors as lt
 import numpy.random
 import setproctitle  # type: ignore
 import torch
@@ -20,6 +21,7 @@ from .utils.logging import info, info_bold
 from .utils.rundir import finish_rundir, setup_rundir
 
 load_dotenv(find_dotenv(usecwd=True))
+lt.monkey_patch()  # type: ignore
 
 
 class Experiment(ABC):
