@@ -108,7 +108,8 @@ class LightningExperiment(Experiment):
                 time="grey82",
                 processing_speed="grey82",
                 metrics="grey82",
-            )
+            ),
+            refresh_rate_per_second=1,
         )
 
         self.callbacks.append(progress_bar)
